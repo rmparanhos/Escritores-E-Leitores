@@ -9,8 +9,9 @@ sem_t escritores, leitores;
 
 void *leitor(void *arg) { 
 	while (1){ 
-		temLeitores ++;
+		//temLeitores ++;
 		if(temEscritores){
+			sem_post(&leitores);
 			sem_wait(&escritores);
 			printf("leitores ini %d\n",arg);
 			fflush(stdout);
@@ -19,6 +20,7 @@ void *leitor(void *arg) {
 			printf("leitores fim %d\n",arg);
 			fflush(stdout);
 			sem_post(&escritores); 
+			sem_post(&leitores);
 		}
 		else{
 			printf("leitores ini %d\n",arg);
@@ -28,17 +30,19 @@ void *leitor(void *arg) {
 			printf("leitores fim %d\n",arg);
 			fflush(stdout);
 		}
-		temLeitores --; //errro está aqui
-		sleep(1); //forçando interrupçao, tudo funciona, preciso usar um semafaro no lugar desse sleep.
+	  /*temLeitores --;
+		if(!temLeitores){
+			sem_post(&leitores);
+		}*/
 	}
 } 
 
 void *escritor(void *arg){ 
  
 	while (1){ 
-		while(temLeitores);
-		sem_wait(&escritores); //Apenas um escritor de cada vez, os outros processos escritores ficam presos aqui
 		temEscritores = 1; //Se existe um escritor, ngm pode ler
+		sem_wait(&leitores);
+		sem_wait(&escritores); //Apenas um escritor de cada vez, os outros processos escritores ficam presos aqui
 		printf("escritores ini %d\n",arg);
 		fflush(stdout);
 		//WRITEUNIT(); 
@@ -46,7 +50,7 @@ void *escritor(void *arg){
 		fflush(stdout);
 		printf("escritores fim %d\n",arg);
 		sem_post(&escritores);
-	//	sem_post(&leitores);
+		sem_post(&leitores);
 		temEscritores = 0;
 	}
 }
@@ -60,7 +64,7 @@ void main() {
 	temEscritores = 0;
 	int n = 1, m = 2;
 	sem_init(&escritores, 0, 1);  
-	sem_init(&leitores, 0, 1);
+	sem_init(&leitores, 0, 0);
 	if(pthread_create(&threadLeitor,NULL,leitor,(void*)n)){
 		printf("error creating thread leitor ");
 		abort();
