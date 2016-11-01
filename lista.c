@@ -36,7 +36,7 @@ void libera (Tfrase *f){
 }
 
 
-
+/*
 Tfrase* cria_lista(char c)
 {
     Tfrase *ptr = (Tfrase*) malloc(sizeof(Tfrase));
@@ -74,4 +74,5 @@ Tfrase * add_lista(Tfrase *frase,char c){
 	}
 	return frase;
 }
+*/
 
